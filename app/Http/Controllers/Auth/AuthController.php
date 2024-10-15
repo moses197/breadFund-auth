@@ -2,54 +2,60 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
-class AuthController extends Controller
+class AuthController extends Controller implements HasMiddleware
 {
 
-    public function __construct()
+    // public function __construct()
+    // {
+    //     $this->middleware();
+    // }
+
+    public static function middleware()
     {
-        $this->middleware('auth:api');
-    }
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
+        return [
+            new Middleware('auth:api', except: ['login', 'register']),
+        ];
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
+    public function register(RegisterRequest $request) {
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+            ]);
+
+            $token = JWTAuth::fromUser($user);
+
+            return response()->json([
+                'user' => $user,
+                'token' => $token,
+            ], 201);
+
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(User $user)
+    public function login(LoginRequest $request)
     {
-        //
+        $credentials = $request->only('email', 'password');
+
+        if(!$token = JWTAuth::attempt($credentials)) {
+            return response()->json([
+                'error' => 'Unauthorized'
+            ], 401);
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, User $user)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(User $user)
-    {
-        //
-    }
 }
