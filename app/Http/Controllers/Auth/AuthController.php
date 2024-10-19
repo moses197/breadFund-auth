@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Exception;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Requests\Auth\RegisterRequest;
-use Exception;
+use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\QueryException;
+use App\Http\Requests\Auth\LoginRequest;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use App\Http\Requests\Auth\RegisterRequest;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Support\Facades\Hash;
-use Tymon\JWTAuth\Exceptions\JWTException;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -41,7 +42,7 @@ class AuthController extends Controller
             $token = JWTAuth::fromUser($user);
 
             return response()->json([
-                'user' => $user,
+                'user' => new UserResource($user),
                 'token' => $token,
             ], 201);
 
@@ -55,7 +56,7 @@ class AuthController extends Controller
             ], 500);
         }
     }
-
+    
     public function login(LoginRequest $request)
     {
         try {
