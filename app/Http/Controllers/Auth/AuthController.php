@@ -97,7 +97,7 @@ class AuthController extends Controller
     public function responseWithToken($token)
     {
         return response()->json([
-            'access_token' => $token,
+            'access_ token' => $token,
             'token_type' => 'bearer',
             'expire_in' => JWTAuth::factory()->getTTL() * 60
         ]);
