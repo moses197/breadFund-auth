@@ -60,17 +60,17 @@ RUN composer install --no-dev --no-interaction --no-progress --optimize-autoload
 # RUN php artisan key:generate
 
 # Cache config and routes
-RUN php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache
+# RUN php artisan config:cache && \
+#     php artisan route:cache && \
+#     php artisan view:cache
 
 # Set permissions for storage and bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
 
 # Expose port 9000
-EXPOSE 10000
+EXPOSE 9000
 
-CMD ["/start.sh"]
+CMD ["start.sh"]
 
 # Start PHP-FPM
 # CMD ["php-fpm"]
