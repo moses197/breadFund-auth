@@ -1,66 +1,22 @@
-# Use PHP 8.2 FPM Alpine as base image
-FROM php:8.2-fpm-alpine
+FROM php:8.3.10
 
-# Set working directory
-WORKDIR /var/www/html
+RUN apt-get update -y && apt-get install -y openssl zip unzip git
 
-# Install system dependencies
-RUN apk add --no-cache \
-    postgresql-dev \
-    libpng-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    git \
-    curl
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_pgsql \
-    bcmath \
-    gd \
-    xml \
-    soap \
-    opcache
+RUN apt-get update && apt-get install -y libpq-dev
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN docker-php-ext-install pdo pdo_pgsql
 
-# Add user for Laravel application
-RUN addgroup -g 1000 laravel && \
-    adduser -G laravel -g laravel -s /bin/sh -D laravel
+RUN php -m | grep mbstring
 
-# Copy existing application directory contents
-COPY . .
+WORKDIR /app
 
-# Image config
-ENV SKIP_COMPOSER 1
-ENV WEBROOT /var/www/html/public
-ENV PHP_ERRORS_STDERR 1
-ENV RUN_SCRIPTS 1
-ENV REAL_IP_HEADER 1
+COPY . /app
 
-# Laravel config
-ENV APP_ENV production
-ENV APP_DEBUG false
-ENV LOG_CHANNEL stderr
+RUN composer install 
 
-# Allow composer to run as root
-ENV COMPOSER_ALLOW_SUPERUSER 1
 
-# Copy existing application directory permissions
-COPY --chown=laravel:laravel . .
+CMD php artisan serve --host=0.0.0.0 --port=8000
 
-# Change current user to laravel
-USER laravel
-
-# Install composer dependencies
-RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader
-
-# Set permissions for storage and bootstrap/cache
-RUN chmod -R 775 storage bootstrap/cache
-
-# Expose port 9000
 EXPOSE 8000
-
-# Start PHP-FPM
-CMD ["php-fpm"]
