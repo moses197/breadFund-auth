@@ -32,10 +32,6 @@ RUN addgroup -g 1000 laravel && \
 # Copy existing application directory contents
 COPY . .
 
-COPY start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
-
-
 # Image config
 ENV SKIP_COMPOSER 1
 ENV WEBROOT /var/www/html/public
@@ -60,21 +56,11 @@ USER laravel
 # Install composer dependencies
 RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader
 
-# Generate application key
-# RUN php artisan key:generate
-
-# Cache config and routes
-# RUN php artisan config:cache && \
-#     php artisan route:cache && \
-#     php artisan view:cache
-
 # Set permissions for storage and bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
 
 # Expose port 9000
 EXPOSE 9000
 
-CMD ["start.sh"]
-
 # Start PHP-FPM
-# CMD ["php-fpm"]
+CMD ["php-fpm"]
