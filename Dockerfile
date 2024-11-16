@@ -60,7 +60,7 @@ RUN composer install --no-dev --no-interaction --no-progress --optimize-autoload
 RUN chmod -R 775 storage bootstrap/cache
 
 # Expose port 9000
-EXPOSE 9000
+EXPOSE 8000
 
 # Start PHP-FPM
 CMD ["php-fpm"]
