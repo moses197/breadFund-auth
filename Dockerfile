@@ -32,6 +32,10 @@ RUN addgroup -g 1000 laravel && \
 # Copy existing application directory contents
 COPY . .
 
+COPY start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
+
 # Image config
 ENV SKIP_COMPOSER 1
 ENV WEBROOT /var/www/html/public
